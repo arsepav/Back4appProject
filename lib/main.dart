@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:back4apptest/emojiChoosing.dart';
+
 import 'keys.dart';
 
 import 'package:flutter/material.dart';
@@ -6,7 +8,6 @@ import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   final keyParseServerUrl = 'https://parseapi.back4app.com';
 
@@ -27,24 +28,28 @@ class _HomeState extends State<Home> {
   final todoController = TextEditingController();
 
   void addToDo() async {
-    if (todoController.text.trim().isEmpty) {
+    if (todoController.text
+        .trim()
+        .isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Empty title"),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 1),
       ));
       return;
     }
-    await saveTodo(todoController.text);
+    await saveTodo(todoController.text, emojiState);
     setState(() {
       todoController.clear();
     });
   }
 
-  void reload() async{
+  void reload() async {
     setState(() {
       todoController.clear();
     });
   }
+
+  int emojiState = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +75,17 @@ class _HomeState extends State<Home> {
                           labelStyle: TextStyle(color: Colors.blueAccent)),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          emojiState++;
+                        });
+                      },
+                      icon: getEmoji(emojiState),
+                    ),
+                  ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         onPrimary: Colors.white,
@@ -86,12 +102,12 @@ class _HomeState extends State<Home> {
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:
                       case ConnectionState.waiting:
-                        // return Center(
-                        //   child: Container(
-                        //       width: 100,
-                        //       height: 100,
-                        //       child: CircularProgressIndicator()),
-                        // );
+                      // return Center(
+                      //   child: Container(
+                      //       width: 100,
+                      //       height: 100,
+                      //       child: CircularProgressIndicator()),
+                      // );
                       default:
                         if (snapshot.hasError) {
                           return Center(
@@ -112,67 +128,94 @@ class _HomeState extends State<Home> {
                                     //*************************************
                                     //Get Parse Object Values
                                     final varTodo = snapshot.data![index];
-                                    final varTitle = varTodo.get<String>('title')!;
-                                    final varDone =  varTodo.get<bool>('done')!;
+                                    final varTitle =
+                                    varTodo.get<String>('title')!;
+                                    final varDone = varTodo.get<bool>('done')!;
+                                    final varEmoji = varTodo.get<int>('emoji')!;
                                     //*************************************
 
                                     return ListTile(
                                       title: Text(varTitle),
                                       leading: CircleAvatar(
-                                        child: Icon(
-                                            varDone ? Icons.check : Icons.error),
-                                        backgroundColor:
-                                        varDone ? Colors.green : Colors.blue,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Checkbox(
-                                              value: varDone,
-                                              onChanged: (value) async {
-                                                await updateTodo(
-                                                    varTodo.objectId!, value!);
-                                                setState(() {
-                                                  //Refresh UI
-                                                });
-                                              }),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.delete,
-                                              color: Colors.blue,
-                                            ),
-                                            onPressed: () async {
-                                              await deleteTodo(varTodo.objectId!);
-                                              setState(() {
-                                                final snackBar = SnackBar(
-                                                  content: Text("Todo deleted!"),
-                                                  duration: Duration(seconds: 2),
-                                                );
-                                                ScaffoldMessenger.of(context)
-                                                  ..removeCurrentSnackBar()
-                                                  ..showSnackBar(snackBar);
-                                              });
-                                            },
-                                          )
-                                        ],
-                                      ),
+                                          child: varDone
+                                              ? Icon(Icons.check)
+                                              : getEmoji(varEmoji),
+                                      backgroundColor: varDone
+                                          ? Colors.green
+                                          : Colors.blue,
+                                      foregroundColor: Colors.white,
+                                    )
+                                    ,
+                                    trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                    Checkbox(
+                                    value: varDone,
+                                    onChanged: (value) async {
+                                    await updateTodo(
+                                    varTodo.objectId!, value!);
+                                    setState(() {
+                                    //Refresh UI
+                                    });
+                                    }),
+                                    IconButton(
+                                    icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.blue,
+                                    ),
+                                    onPressed: () async {
+                                    await deleteTodo(
+                                    varTodo.objectId!);
+                                    setState(() {
+                                    final snackBar = SnackBar(
+                                    content:
+                                    Text("Todo deleted!"),
+                                    duration:
+                                    Duration(seconds: 2),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                    ..removeCurrentSnackBar()
+                                    ..showSnackBar(snackBar);
+                                    });
+                                    },
+                                    )
+                                    ]
+                                    ,
+                                    )
+                                    ,
                                     );
                                   }),
                               Positioned(
-                                bottom: MediaQuery.of(context).size.width / 30,
+                                bottom: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width / 30,
                                 // Adjust this value to change the distance from the bottom
-                                right: MediaQuery.of(context).size.width / 30,
+                                right: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width / 30,
                                 // Adjust this value to change the distance from the right
                                 child: SizedBox(
-                                  width: MediaQuery.of(context).size.width / 5,
-                                  height: MediaQuery.of(context).size.width / 5,
+                                  width: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .width / 5,
+                                  height: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .width / 5,
                                   child: FloatingActionButton(
                                     onPressed: () {
                                       reload();
                                     },
                                     child: Icon(Icons.refresh,
-                                        size: MediaQuery.of(context).size.width / 12),
+                                        size:
+                                        MediaQuery
+                                            .of(context)
+                                            .size
+                                            .width /
+                                            12),
                                   ),
                                 ),
                               ),
@@ -186,8 +229,9 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> saveTodo(String title) async {
-    final todo = ParseObject('Todo')..set('title', title)..set('done', false);
+  Future<void> saveTodo(String title, int emojiState) async {
+    final todo = ParseObject('Todo')
+      ..set('title', title)..set('done', false)..set('emoji', emojiState);
     await todo.save();
   }
 
@@ -211,7 +255,8 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> deleteTodo(String id) async {
-    var todo = ParseObject('Todo')..objectId = id;
+    var todo = ParseObject('Todo')
+      ..objectId = id;
     await todo.delete();
   }
 }
