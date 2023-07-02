@@ -40,6 +40,12 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void reload() async{
+    setState(() {
+      todoController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,60 +103,81 @@ class _HomeState extends State<Home> {
                             child: Text("No Data..."),
                           );
                         } else {
-                          return ListView.builder(
-                              padding: EdgeInsets.only(top: 10.0),
-                              itemCount: snapshot.data!.length,
-                              itemBuilder: (context, index) {
-                                //*************************************
-                                //Get Parse Object Values
-                                final varTodo = snapshot.data![index];
-                                final varTitle = varTodo.get<String>('title')!;
-                                final varDone =  varTodo.get<bool>('done')!;
-                                //*************************************
+                          return Stack(
+                            children: [
+                              ListView.builder(
+                                  padding: EdgeInsets.only(top: 10.0),
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (context, index) {
+                                    //*************************************
+                                    //Get Parse Object Values
+                                    final varTodo = snapshot.data![index];
+                                    final varTitle = varTodo.get<String>('title')!;
+                                    final varDone =  varTodo.get<bool>('done')!;
+                                    //*************************************
 
-                                return ListTile(
-                                  title: Text(varTitle),
-                                  leading: CircleAvatar(
-                                    child: Icon(
-                                        varDone ? Icons.check : Icons.error),
-                                    backgroundColor:
-                                    varDone ? Colors.green : Colors.blue,
-                                    foregroundColor: Colors.white,
+                                    return ListTile(
+                                      title: Text(varTitle),
+                                      leading: CircleAvatar(
+                                        child: Icon(
+                                            varDone ? Icons.check : Icons.error),
+                                        backgroundColor:
+                                        varDone ? Colors.green : Colors.blue,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Checkbox(
+                                              value: varDone,
+                                              onChanged: (value) async {
+                                                await updateTodo(
+                                                    varTodo.objectId!, value!);
+                                                setState(() {
+                                                  //Refresh UI
+                                                });
+                                              }),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.delete,
+                                              color: Colors.blue,
+                                            ),
+                                            onPressed: () async {
+                                              await deleteTodo(varTodo.objectId!);
+                                              setState(() {
+                                                final snackBar = SnackBar(
+                                                  content: Text("Todo deleted!"),
+                                                  duration: Duration(seconds: 2),
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                  ..removeCurrentSnackBar()
+                                                  ..showSnackBar(snackBar);
+                                              });
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                              Positioned(
+                                bottom: MediaQuery.of(context).size.width / 30,
+                                // Adjust this value to change the distance from the bottom
+                                right: MediaQuery.of(context).size.width / 30,
+                                // Adjust this value to change the distance from the right
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width / 5,
+                                  height: MediaQuery.of(context).size.width / 5,
+                                  child: FloatingActionButton(
+                                    onPressed: () {
+                                      reload();
+                                    },
+                                    child: Icon(Icons.refresh,
+                                        size: MediaQuery.of(context).size.width / 12),
                                   ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Checkbox(
-                                          value: varDone,
-                                          onChanged: (value) async {
-                                            await updateTodo(
-                                                varTodo.objectId!, value!);
-                                            setState(() {
-                                              //Refresh UI
-                                            });
-                                          }),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.delete,
-                                          color: Colors.blue,
-                                        ),
-                                        onPressed: () async {
-                                          await deleteTodo(varTodo.objectId!);
-                                          setState(() {
-                                            final snackBar = SnackBar(
-                                              content: Text("Todo deleted!"),
-                                              duration: Duration(seconds: 2),
-                                            );
-                                            ScaffoldMessenger.of(context)
-                                              ..removeCurrentSnackBar()
-                                              ..showSnackBar(snackBar);
-                                          });
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                );
-                              });
+                                ),
+                              ),
+                            ],
+                          );
                         }
                     }
                   }))
