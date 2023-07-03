@@ -1,21 +1,24 @@
 import 'dart:async';
 import 'package:back4apptest/emojiChoosing.dart';
+import 'package:back4apptest/signinscreen.dart';
 
 import 'keys.dart';
 
 import 'package:flutter/material.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
+import 'groupKeys.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final keyParseServerUrl = 'https://parseapi.back4app.com';
+
 
   await Parse().initialize(keyApplicationId, keyParseServerUrl,
       clientKey: keyClientKey, debug: true);
 
   runApp(MaterialApp(
-    home: Home(),
+    home: SignIn(),
   ));
 }
 
@@ -230,14 +233,14 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> saveTodo(String title, int emojiState) async {
-    final todo = ParseObject('Todo')
+    final todo = ParseObject(groupKey)
       ..set('title', title)..set('done', false)..set('emoji', emojiState);
     await todo.save();
   }
 
   Future<List<ParseObject>> getTodo() async {
     QueryBuilder<ParseObject> queryTodo =
-    QueryBuilder<ParseObject>(ParseObject('Todo'));
+    QueryBuilder<ParseObject>(ParseObject(groupKey));
     final ParseResponse apiResponse = await queryTodo.query();
 
     if (apiResponse.success && apiResponse.results != null) {
@@ -248,14 +251,14 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> updateTodo(String id, bool done) async {
-    var todo = ParseObject('Todo')
+    var todo = ParseObject(groupKey)
       ..objectId = id
       ..set('done', done);
     await todo.save();
   }
 
   Future<void> deleteTodo(String id) async {
-    var todo = ParseObject('Todo')
+    var todo = ParseObject(groupKey)
       ..objectId = id;
     await todo.delete();
   }
