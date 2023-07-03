@@ -63,13 +63,18 @@ class _SignInState extends State<SignIn> {
               );
             }),
             keyError != 0
-                ? const Text(
-                    "Enter the correct key.\nCorrect key must consist of latin letters and digits",
-                    style: TextStyle(
+                ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Text(
+                      "Enter the correct key.\nCorrect key must consist of latin letters and digits",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         fontSize: 20,
                         color: Colors.red,
-                        fontWeight: FontWeight.w500),
-                  )
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                )
                 : Container(),
           ],
         ),
