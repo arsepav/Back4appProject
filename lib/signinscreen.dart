@@ -17,7 +17,7 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Join the group"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xCBE646FF),
         centerTitle: true,
       ),
       body: Center(
@@ -32,7 +32,7 @@ class _SignInState extends State<SignIn> {
                 controller: keyController,
                 decoration: InputDecoration(
                     labelText: "Enter the group key",
-                    labelStyle: TextStyle(color: Colors.blueAccent)),
+                    labelStyle: TextStyle(color: Color(0xCBE646FF))),
               ),
             ),
             Builder(builder: (context) {
